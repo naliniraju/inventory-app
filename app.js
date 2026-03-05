@@ -13,8 +13,8 @@ function openModal(data=null){
     document.getElementById("modalItem").value = data.item_name;
     document.getElementById("modalCategory").value = data.category;
     document.getElementById("modalQty").value = data.quantity;
-    document.getElementById("modalAvailableStock").value = data.available_stoc;
-    document.getElementById("modalMinStock").value = data.minimum_sto;
+    document.getElementById("modalAvailableStock").value = data.available_stock;
+    document.getElementById("modalMinStock").value = data.minimum_stock;
     document.getElementById("modalUnits").value = data.units;
     editId = data.id;
   } else {
@@ -56,8 +56,8 @@ function renderTable(data){
       <td>${i.item_name}</td>
       <td>${i.category}</td>
       <td>${i.quantity}</td>
-      <td>${i.available_stoc}</td>
-      <td>${i.minimum_sto}</td>
+      <td>${i.available_stock}</td>
+      <td>${i.minimum_stock}</td>
       <td>${i.units}</td>
       <td>${status}</td>
       <td>
@@ -73,16 +73,16 @@ async function saveItem(){
   const item_name = document.getElementById("modalItem").value.trim();
   const category = document.getElementById("modalCategory").value.trim();
   const quantity = Number(document.getElementById("modalQty").value);
-  const available_stoc = Number(document.getElementById("modalAvailableStock").value);
-  const minimum_sto = Number(document.getElementById("modalMinStock").value);
+  const available_stock = Number(document.getElementById("modalAvailableStock").value);
+  const minimum_stock = Number(document.getElementById("modalMinStock").value);
   const units = document.getElementById("modalUnits").value.trim();
 
-  if(!item_name || !category || isNaN(quantity) || isNaN(available_stoc) || isNaN(minimum_sto) || !units){
+  if(!item_name || !category || isNaN(quantity) || isNaN(available_stock) || isNaN(minimum_stock) || !units){
     alert("Please fill all fields correctly");
     return;
   }
 
-  const payload = { item_name, category, quantity, available_stoc, minimum_sto, units };
+  const payload = { item_name, category, quantity, available_stock, minimum_stock, units };
 
   if(editId){
     await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${editId}`, {
