@@ -13,7 +13,7 @@ function openModal(data = null) {
         document.getElementById("modalTitle").innerText = "Edit Item";
         document.getElementById("modalItem").value = data.item_name;
         document.getElementById("modalCategory").value = data.category;
-        document.getElementById("modalQty").value = data.quantity;
+     //   document.getElementById("modalQty").value = data.quantity;
         document.getElementById("modalAvailableStock").value = data.available_stock;
         document.getElementById("modalMinStock").value = data.minimum_stock;
         document.getElementById("modalUnits").value = data.units;
@@ -22,7 +22,7 @@ function openModal(data = null) {
         document.getElementById("modalTitle").innerText = "Add Item";
         document.getElementById("modalItem").value = "";
         document.getElementById("modalCategory").value = "";
-        document.getElementById("modalQty").value = "";
+       // document.getElementById("modalQty").value = "";
         document.getElementById("modalAvailableStock").value = "";
         document.getElementById("modalMinStock").value = "";
         document.getElementById("modalUnits").value = "";
@@ -71,7 +71,6 @@ function renderTable(data){
     row.innerHTML = `
       <td>${i.item_name}</td>
       <td>${i.category}</td>
-     <!--<td>${i.quantity}</td>-->
       <td>${i.available_stock}</td>
       <td>${i.minimum_stock}</td>
       <td>${i.units}</td>
@@ -88,19 +87,19 @@ function renderTable(data){
 async function saveItem() {
   const item_name = document.getElementById("modalItem").value.trim();
   const category = document.getElementById("modalCategory").value.trim();
-  const quantity = Number(document.getElementById("modalQty").value);
+  //const quantity = Number(document.getElementById("modalQty").value);
   const available_stock = Number(document.getElementById("modalAvailableStock").value);
   const minimum_stock = Number(document.getElementById("modalMinStock").value);
   const units = document.getElementById("modalUnits").value.trim();
 
   // Validate all fields
-  if(!item_name || !category || !units || isNaN(quantity) || isNaN(available_stock) || isNaN(minimum_stock)){
+  if(!item_name || !category || !units || isNaN(available_stock) || isNaN(minimum_stock)){
     alert("Please fill all fields correctly.");
     return;
   }
 
   // Only send the exact fields that exist in your table
-  const payload = { item_name, category, quantity, available_stock, minimum_stock, units };
+  const payload = { item_name, category, available_stock, minimum_stock, units };
 
   let url = `${SUPABASE_URL}/rest/v1/${TABLE}`;
   let method = "POST";
