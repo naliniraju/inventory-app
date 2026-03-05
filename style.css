@@ -93,10 +93,7 @@ tr:hover td {
     background: #f0f8ff;
 }
 
-.low {
-    color: red;
-    font-weight: bold;
-}
+
 
 /* ---------- Modal ---------- */
 .modal {
@@ -160,4 +157,12 @@ tr:hover td {
 
 .low td {
     color: #b30000;           /* ensure text in row is red */
+}
+tr.low {
+    background-color: #ffdddd; /* light red background */
+    font-weight: bold;
+}
+
+tr.low td {
+    color: #b30000;           /* dark red text */
 }

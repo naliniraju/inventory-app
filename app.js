@@ -59,19 +59,18 @@ function renderTable(data){
   tableBody.innerHTML = "";
 
   data.forEach(i => {
-    // Check low stock
-    const isLow = i.available_stock < i.minimum_stock;
-    
-    const row = document.createElement("tr");
+    const available = Number(i.available_stock);
+    const minimum = Number(i.minimum_stock);
+    const isLow = available < minimum;
 
-    // Apply 'low' class to entire row if stock is low
+    const row = document.createElement("tr");
     if(isLow) row.classList.add("low");
 
     row.innerHTML = `
       <td>${i.item_name}</td>
       <td>${i.category}</td>
-      <td>${i.available_stock}</td>
-      <td>${i.minimum_stock}</td>
+      <td>${available}</td>
+      <td>${minimum}</td>
       <td>${i.units}</td>
       <td>${isLow ? "Low" : "OK"}</td>
       <td>
