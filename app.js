@@ -13,7 +13,6 @@ function openModal(data = null) {
         document.getElementById("modalTitle").innerText = "Edit Item";
         document.getElementById("modalItem").value = data.item_name;
         document.getElementById("modalCategory").value = data.category;
-     //   document.getElementById("modalQty").value = data.quantity;
         document.getElementById("modalAvailableStock").value = data.available_stock;
         document.getElementById("modalMinStock").value = data.minimum_stock;
         document.getElementById("modalUnits").value = data.units;
@@ -87,7 +86,6 @@ function renderTable(data){
 async function saveItem() {
   const item_name = document.getElementById("modalItem").value.trim();
   const category = document.getElementById("modalCategory").value.trim();
-  //const quantity = Number(document.getElementById("modalQty").value);
   const available_stock = Number(document.getElementById("modalAvailableStock").value);
   const minimum_stock = Number(document.getElementById("modalMinStock").value);
   const units = document.getElementById("modalUnits").value.trim();
