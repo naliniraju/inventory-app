@@ -49,15 +49,15 @@ function renderTable(data){
   const tableBody = document.getElementById("tableBody");
   tableBody.innerHTML = "";
   data.forEach(i=>{
-    const status = i.available_stock <= i.minimum_sto ? "<span class='low'>Low</span>" : "OK";
+    const status = i.available_stoc <= i.minimum_sto ? "<span class='low'>Low</span>" : "OK";
     const row = document.createElement("tr");
-    if(i.available_stock <= i.minimum_sto) row.classList.add("low");
+    if(i.available_stoc <= i.minimum_sto) row.classList.add("low");
     row.innerHTML = `
       <td>${i.item_name}</td>
       <td>${i.category}</td>
       <td>${i.quantity}</td>
-      <td>${i.available_stock}</td>
-      <td>${i.minimum_stock}</td>
+      <td>${i.available_stoc}</td>
+      <td>${i.minimum_sto}</td>
       <td>${i.units}</td>
       <td>${status}</td>
       <td>
@@ -70,25 +70,32 @@ function renderTable(data){
 }
 
 async function saveItem(){
-  const item_name = document.getElementById("modalItem").value;
-  const category = document.getElementById("modalCategory").value;
+  const item_name = document.getElementById("modalItem").value.trim();
+  const category = document.getElementById("modalCategory").value.trim();
   const quantity = Number(document.getElementById("modalQty").value);
-  const available_stock = Number(document.getElementById("modalAvailableStock").value);
-  const minimum_stock = Number(document.getElementById("modalMinStock").value);
-  const units = document.getElementById("modalUnits").value;
+  const available_stoc = Number(document.getElementById("modalAvailableStock").value);
+  const minimum_sto = Number(document.getElementById("modalMinStock").value);
+  const units = document.getElementById("modalUnits").value.trim();
+
+  if(!item_name || !category || isNaN(quantity) || isNaN(available_stoc) || isNaN(minimum_sto) || !units){
+    alert("Please fill all fields correctly");
+    return;
+  }
+
+  const payload = { item_name, category, quantity, available_stoc, minimum_sto, units };
 
   if(editId){
     await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${editId}`, {
       method:"PATCH",
       headers:{"Content-Type":"application/json", apikey:API_KEY, Authorization:`Bearer ${API_KEY}`},
-      body: JSON.stringify({item_name, category, quantity, available_stock, minimum_stock, units})
+      body: JSON.stringify(payload)
     });
     showToast("Item updated");
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
       method:"POST",
       headers:{"Content-Type":"application/json", apikey:API_KEY, Authorization:`Bearer ${API_KEY}`},
-      body: JSON.stringify({item_name, category, quantity, available_stock, minimum_stock, units})
+      body: JSON.stringify(payload)
     });
     showToast("Item added");
   }
@@ -109,7 +116,7 @@ async function deleteItem(id){
 
 // --- Low Stock Email Placeholder ---
 function sendLowStockEmail(){
-  alert("For frontend-only version, sending email requires a backend (Supabase Edge Functions or Firebase Functions).");
+  alert("For frontend-only version, sending email requires a backend (Supabase Edge Functions).");
 }
 
 // --- Events ---
