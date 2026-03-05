@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stock Inventory</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h2>Inventory Manager</h2>
+
+<div class="form">
+
+<input id="item_name" placeholder="Item Name">
+
+<input id="category" placeholder="Category">
+
+<input id="quantity" type="number" placeholder="Quantity">
+
+<input id="available_stoc" type="number" placeholder="Available Stock">
+
+<input id="minimum_sto" type="number" placeholder="Minimum Stock">
+
+<input id="units" placeholder="Units">
+
+<button onclick="addItem()">Add Item</button>
+
+</div>
+
+<input id="search" placeholder="Search Item" onkeyup="loadItems()">
+
+<table>
+
+<thead>
+<tr>
+<th>Item</th>
+<th>Category</th>
+<th>Qty</th>
+<th>Available</th>
+<th>Min</th>
+<th>Units</th>
+<th>Status</th>
+<th>Delete</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+<script src="app.js"></script>
+
+</body>
+</html>
