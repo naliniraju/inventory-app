@@ -154,7 +154,34 @@ async function deleteItem(id) {
 function sendLowStockEmail() {
     alert("Frontend-only version: sending email requires a backend (Supabase Edge Functions).");
 }
+// --- Send WhatsApp Low Stock ---
+async function sendLowStockWhatsApp() {
+    // Fetch all items
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,available_stock,minimum_stock`, {
+        headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
+    });
+    const data = await res.json();
+    
+    // Filter low-stock items
+    const lowItems = data
+        .filter(i => Number(i.available_stock) < Number(i.minimum_stock))
+        .map(i => `${i.item_name} (${i.available_stock}/${i.minimum_stock})`);
+    
+    if(lowItems.length === 0){
+        alert("✅ No low-stock items.");
+        return;
+    }
 
+    // Compose WhatsApp message
+    const message = `⚠️ Low Stock Alert:\n${lowItems.join("\n")}`;
+
+    // Replace with your WhatsApp number (country code, no +)
+    const phoneNumber = "919876543210"; 
+
+    // Open WhatsApp link (WhatsApp Web or mobile app)
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+}
 // --- Events ---
 document.getElementById("search").addEventListener("input", loadItems);
 document.addEventListener("DOMContentLoaded", loadItems);
