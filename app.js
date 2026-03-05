@@ -54,8 +54,8 @@ async function addItem(){
 const item_name=document.getElementById("item_name").value
 const category=document.getElementById("category").value
 const quantity=document.getElementById("quantity").value
-const available_stoc=document.getElementById("available_stoc").value
-const minimum_sto=document.getElementById("minimum_sto").value
+const available_stoc=document.getElementById("available_stock").value
+const minimum_sto=document.getElementById("minimum_stock").value
 const units=document.getElementById("units").value
 
 await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`,{
