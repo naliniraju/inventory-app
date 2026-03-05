@@ -81,40 +81,51 @@ function renderTable(data) {
 
 // --- Save Item ---
 async function saveItem() {
-    const payload = {
-        item_name: document.getElementById("modalItem").value.trim(),
-        category: document.getElementById("modalCategory").value.trim(),
-        quantity: Number(document.getElementById("modalQty").value),
-        available_stoc: Number(document.getElementById("modalAvailableStock").value),
-        minimum_sto: Number(document.getElementById("modalMinStock").value),
-        units: document.getElementById("modalUnits").value.trim()
-    };
+  const item_name = document.getElementById("modalItem").value.trim();
+  const category = document.getElementById("modalCategory").value.trim();
+  const quantity = Number(document.getElementById("modalQty").value);
+  const available_stock = Number(document.getElementById("modalAvailableStock").value);
+  const minimum_stock = Number(document.getElementById("modalMinStock").value);
+  const units = document.getElementById("modalUnits").value.trim();
 
-    if (!payload.item_name || !payload.category || !payload.units ||
-        isNaN(payload.quantity) || isNaN(payload.available_stock) || isNaN(payload.minimum_stock)) {
-        alert("Please fill all fields correctly");
-        return;
-    }
+  // Validate all fields
+  if(!item_name || !category || !units || isNaN(quantity) || isNaN(available_stoc) || isNaN(minimum_sto)){
+    alert("Please fill all fields correctly.");
+    return;
+  }
 
-    if (editId) {
-        await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${editId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json", apikey: API_KEY, Authorization: `Bearer ${API_KEY}` },
-            body: JSON.stringify(payload)
-        });
-        showToast("Item updated");
-    } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", apikey: API_KEY, Authorization: `Bearer ${API_KEY}` },
-            body: JSON.stringify(payload)
-        });
-        showToast("Item added");
-    }
-    closeModal();
-    loadItems();
+  // Only send the exact fields that exist in your table
+  const payload = { item_name, category, quantity, available_stock, minimum_stock, units };
+
+  let url = `${SUPABASE_URL}/rest/v1/${TABLE}`;
+  let method = "POST";
+
+  if(editId){
+    url += `?id=eq.${editId}`;
+    method = "PATCH";
+  }
+
+  const res = await fetch(url, {
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": API_KEY,
+      "Authorization": `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if(!res.ok){
+    const errorData = await res.text(); // or await res.json() if JSON
+    console.error("Supabase error:", errorData);
+    alert("Error saving item. Check console for details.");
+    return;
+  }
+
+  showToast(editId ? "Item updated" : "Item added");
+  closeModal();
+  loadItems();
 }
-
 // --- Edit helper ---
 async function openModalById(id) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`, {
