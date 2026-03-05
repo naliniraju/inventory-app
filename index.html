@@ -15,33 +15,35 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
+<header class="dashboard-header">
   <h1>Inventory Dashboard</h1>
-  <input type="text" id="search" placeholder="Search item/category">
-  <div class="header-buttons">
-    <button class="btn-add" onclick="openModal()">Add Item</button>
-    <button class="btn-mail" onclick="sendLowStockEmail()">Send Low Stock Email</button>
+  <div class="header-controls">
+    <input type="text" id="search" placeholder="Search item/category">
+    <div class="buttons">
+      <button class="btn-add" onclick="openModal()">Add Item</button>
+      <button class="btn-mail" onclick="sendLowStockEmail()">Send Low Stock Email</button>
+    </div>
   </div>
 </header>
-<div class="table-container">
 
-<table>
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Category</th>
-      <th>Qty</th>
-      <th>Available</th>
-      <th>Min</th>
-      <th>Units</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th>Qty</th>
+        <th>Available</th>
+        <th>Min</th>
+        <th>Units</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 </div>
+
 <!-- Modal -->
 <div class="modal" id="modal">
   <div class="modal-content">
@@ -54,16 +56,12 @@
     <input id="modalUnits" placeholder="Units">
     <div class="modal-actions">
       <button class="btn-add" onclick="saveItem()">Save</button>
-      <button onclick="closeModal()">Cancel</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- Toastify JS -->
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-<!-- App JS -->
 <script src="app.js"></script>
-
 </body>
 </html>

@@ -55,30 +55,35 @@ async function loadItems() {
     renderTable(data);
 }
 
-function renderTable(data) {
-    const tableBody = document.getElementById("tableBody");
-    tableBody.innerHTML = "";
-    data.forEach(i => {
-        const status = i.available_stoc <= i.minimum_sto ? "<span class='low'>Low</span>" : "OK";
-        const row = document.createElement("tr");
-        if (i.available_stoc <= i.minimum_sto) row.classList.add("low");
-        row.innerHTML = `
-            <td>${i.item_name}</td>
-            <td>${i.category}</td>
-            <td>${i.quantity}</td>
-            <td>${i.available_stock}</td>
-            <td>${i.minimum_stock}</td>
-            <td>${i.units}</td>
-            <td>${status}</td>
-            <td>
-                <button class="btn-edit" onclick="openModalById('${i.id}')">Edit</button>
-                <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
+function renderTable(data){
+  const tableBody = document.getElementById("tableBody");
+  tableBody.innerHTML = "";
 
+  data.forEach(i => {
+    // Check low stock
+    const isLow = i.available_stock < i.minimum_stock;
+    
+    const row = document.createElement("tr");
+
+    // Apply 'low' class to entire row if stock is low
+    if(isLow) row.classList.add("low");
+
+    row.innerHTML = `
+      <td>${i.item_name}</td>
+      <td>${i.category}</td>
+     <!--<td>${i.quantity}</td>-->
+      <td>${i.available_stock}</td>
+      <td>${i.minimum_stock}</td>
+      <td>${i.units}</td>
+      <td>${isLow ? "Low" : "OK"}</td>
+      <td>
+        <button class="btn-edit" onclick='openModal(${JSON.stringify(i)})'>Edit</button>
+        <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
 // --- Save Item ---
 async function saveItem() {
   const item_name = document.getElementById("modalItem").value.trim();
