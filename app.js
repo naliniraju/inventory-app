@@ -176,7 +176,7 @@ async function sendLowStockWhatsApp() {
     const message = `⚠️ Low Stock Alert:\n${lowItems.join("\n")}`;
 
     // Replace with your WhatsApp number (country code, no +)
-    const phoneNumber = "919876543210"; 
+    const phoneNumber = "917760530532"; 
 
     // Open WhatsApp link (WhatsApp Web or mobile app)
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
