@@ -89,7 +89,7 @@ async function saveItem() {
   const units = document.getElementById("modalUnits").value.trim();
 
   // Validate all fields
-  if(!item_name || !category || !units || isNaN(quantity) || isNaN(available_stoc) || isNaN(minimum_sto)){
+  if(!item_name || !category || !units || isNaN(quantity) || isNaN(available_stock) || isNaN(minimum_stock)){
     alert("Please fill all fields correctly.");
     return;
   }
