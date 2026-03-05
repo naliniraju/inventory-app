@@ -55,31 +55,33 @@ async function loadItems() {
 }
 
 function renderTable(data){
-  const tableBody = document.getElementById("tableBody");
-  tableBody.innerHTML = "";
+    const tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
 
-  data.forEach(i => {
-    const available = Number(i.available_stock);
-    const minimum = Number(i.minimum_stock);
-    const isLow = available < minimum;
+    data.forEach(i => {
+        // Convert to numbers to avoid string comparison issues
+        const available = Number(i.available_stock);
+        const minimum = Number(i.minimum_stock);
+        const isLow = available < minimum;
 
-    const row = document.createElement("tr");
-    if(isLow) row.classList.add("low");
+        const row = document.createElement("tr");
+        if(isLow) row.classList.add("low");
 
-    row.innerHTML = `
-      <td>${i.item_name}</td>
-      <td>${i.category}</td>
-      <td>${available}</td>
-      <td>${minimum}</td>
-      <td>${i.units}</td>
-      <td>${isLow ? "Low" : "OK"}</td>
-      <td>
-        <button class="btn-edit" onclick='openModal(${JSON.stringify(i)})'>Edit</button>
-        <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
+        row.innerHTML = `
+            <td>${i.item_name}</td>
+            <td>${i.category}</td>
+            <td>${available}</td>
+            <td>${minimum}</td>
+            <td>${i.units}</td>
+            <td>${isLow ? "Low" : "OK"}</td>
+            <td>
+                <button class="btn-edit" onclick='openModal(${JSON.stringify(i)})'>Edit</button>
+                <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
 }
 // --- Save Item ---
 async function saveItem() {
