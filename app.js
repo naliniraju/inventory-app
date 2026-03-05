@@ -49,15 +49,15 @@ function renderTable(data){
   const tableBody = document.getElementById("tableBody");
   tableBody.innerHTML = "";
   data.forEach(i=>{
-    const status = i.available_stoc <= i.minimum_sto ? "<span class='low'>Low</span>" : "OK";
+    const status = i.available_stock <= i.minimum_sto ? "<span class='low'>Low</span>" : "OK";
     const row = document.createElement("tr");
-    if(i.available_stoc <= i.minimum_sto) row.classList.add("low");
+    if(i.available_stock <= i.minimum_sto) row.classList.add("low");
     row.innerHTML = `
       <td>${i.item_name}</td>
       <td>${i.category}</td>
       <td>${i.quantity}</td>
-      <td>${i.available_stoc}</td>
-      <td>${i.minimum_sto}</td>
+      <td>${i.available_stock}</td>
+      <td>${i.minimum_stock}</td>
       <td>${i.units}</td>
       <td>${status}</td>
       <td>
@@ -73,22 +73,22 @@ async function saveItem(){
   const item_name = document.getElementById("modalItem").value;
   const category = document.getElementById("modalCategory").value;
   const quantity = Number(document.getElementById("modalQty").value);
-  const available_stoc = Number(document.getElementById("modalAvailableStock").value);
-  const minimum_sto = Number(document.getElementById("modalMinStock").value);
+  const available_stock = Number(document.getElementById("modalAvailableStock").value);
+  const minimum_stock = Number(document.getElementById("modalMinStock").value);
   const units = document.getElementById("modalUnits").value;
 
   if(editId){
     await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${editId}`, {
       method:"PATCH",
       headers:{"Content-Type":"application/json", apikey:API_KEY, Authorization:`Bearer ${API_KEY}`},
-      body: JSON.stringify({item_name, category, quantity, available_stoc, minimum_sto, units})
+      body: JSON.stringify({item_name, category, quantity, available_stock, minimum_stock, units})
     });
     showToast("Item updated");
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
       method:"POST",
       headers:{"Content-Type":"application/json", apikey:API_KEY, Authorization:`Bearer ${API_KEY}`},
-      body: JSON.stringify({item_name, category, quantity, available_stoc, minimum_sto, units})
+      body: JSON.stringify({item_name, category, quantity, available_stock, minimum_stock, units})
     });
     showToast("Item added");
   }
