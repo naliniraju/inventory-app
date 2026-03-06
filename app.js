@@ -2,8 +2,7 @@
 const SUPABASE_URL="https://lmyizgwxxdfmwvwlvlum.supabase.co";
 const API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxteWl6Z3d4eGRmbXd2d2x2bHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2ODcwNTQsImV4cCI6MjA4ODI2MzA1NH0.7ffes53M8XXQuIAAS_80-RPqVHCI56NIyw79T3uxk2w"
 const TABLE="Stock";
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, API_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, API_KEY)
 let editId = null;
 //login///
 async function login(){
@@ -11,18 +10,18 @@ async function login(){
 const email = document.getElementById("loginEmail").value
 const password = document.getElementById("loginPassword").value
 
-const { data, error } = await supabase.auth.signInWithPassword({
+const { data, error } = await supabaseClient.auth.signInWithPassword({
 email: email,
 password: password
 })
 
 if(error){
-alert("Login failed")
+alert("Login failed: " + error.message)
 return
 }
 
-document.getElementById("loginScreen").style.display="none"
-document.getElementById("dashboard").style.display="block"
+document.getElementById("loginScreen").style.display = "none"
+document.getElementById("dashboard").style.display = "block"
 
 loadItems()
 
