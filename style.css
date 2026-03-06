@@ -183,3 +183,46 @@ font-size:16px;
 background:white;
 min-width:180px;
 }
+.login-screen{
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:linear-gradient(135deg,#182848,#4b6cb7);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999;
+}
+
+.login-box{
+background:white;
+padding:40px;
+border-radius:12px;
+width:320px;
+display:flex;
+flex-direction:column;
+gap:12px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.login-box input{
+padding:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.login-box button{
+background:#0077ff;
+color:white;
+border:none;
+padding:10px;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.login-box button:hover{
+background:#005fd1;
+}

@@ -2,9 +2,42 @@
 const SUPABASE_URL="https://lmyizgwxxdfmwvwlvlum.supabase.co";
 const API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxteWl6Z3d4eGRmbXd2d2x2bHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2ODcwNTQsImV4cCI6MjA4ODI2MzA1NH0.7ffes53M8XXQuIAAS_80-RPqVHCI56NIyw79T3uxk2w"
 const TABLE="Stock";
-
+const supabase = window.supabase.createClient(SUPABASE_URL, API_KEY);
 
 let editId = null;
+//login///
+async function login(){
+
+const email = document.getElementById("loginEmail").value
+const password = document.getElementById("loginPassword").value
+
+const { data, error } = await supabase.auth.signInWithPassword({
+email: email,
+password: password
+})
+
+if(error){
+alert("Login failed")
+return
+}
+
+document.getElementById("loginScreen").style.display="none"
+document.getElementById("dashboard").style.display="block"
+
+loadItems()
+
+}
+async function checkSession(){
+
+const { data: { session } } = await supabase.auth.getSession()
+
+if(session){
+document.getElementById("loginScreen").style.display="none"
+document.getElementById("dashboard").style.display="block"
+loadItems()
+}
+
+}
 
 // --- Modal Functions ---
 function openModal(data = null) {
@@ -293,12 +326,14 @@ window.open(url,"_blank")
 // --- Events ---
 document.addEventListener("DOMContentLoaded", () => {
 
-  document.getElementById("search")
-    .addEventListener("input", loadItems);
+checkSession()
 
-  document.getElementById("categoryFilter")
-    .addEventListener("change", loadItems);
+document.getElementById("search")
+.addEventListener("input", loadItems)
 
-  loadItems();
+document.getElementById("categoryFilter")
+.addEventListener("change", loadItems)
 
-});
+loadCategories()
+
+})
