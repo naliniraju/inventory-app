@@ -2,7 +2,7 @@
 const SUPABASE_URL="https://lmyizgwxxdfmwvwlvlum.supabase.co";
 const API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxteWl6Z3d4eGRmbXd2d2x2bHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2ODcwNTQsImV4cCI6MjA4ODI2MzA1NH0.7ffes53M8XXQuIAAS_80-RPqVHCI56NIyw79T3uxk2w"
 const TABLE="Stock";
-const supabase = window.supabase.createClient(SUPABASE_URL, API_KEY);
+//const supabase = window.supabase.createClient(SUPABASE_URL, API_KEY);
 
 let editId = null;
 //login///
