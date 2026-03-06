@@ -295,54 +295,73 @@ async function sendLowStockWhatsApp1() {
 ////////
 async function sendLowStockWhatsApp(){
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,available_stock,minimum_stock`,{
+const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,category,available_stock,minimum_stock`,{
 headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
 })
 
 const data = await res.json()
 
-const lowStock = []
-const availableStock = []
+const lowByCategory = {}
+const availableByCategory = {}
 
 data.forEach(i=>{
 
+const cat = i.category || "Other"
 const available = Number(i.available_stock)
 const minimum = Number(i.minimum_stock)
 
 if(available < minimum){
-lowStock.push(`⚠️ *${i.item_name}*  (${available}/${minimum})`)
+
+if(!lowByCategory[cat]) lowByCategory[cat] = []
+
+lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available}/${minimum})`)
+
 }else{
-availableStock.push(`✅ *${i.item_name}*  (${available})`)
+
+if(!availableByCategory[cat]) availableByCategory[cat] = []
+
+availableByCategory[cat].push(`✅ *${i.item_name}* (${available})`)
+
 }
 
 })
 
-if(lowStock.length === 0 && availableStock.length === 0){
-alert("No inventory data")
-return
+let message = `📦 *INVENTORY REPORT*\n\n`
+
+// LOW STOCK SECTION
+message += `🚨 *LOW STOCK ITEMS*\n`
+message += `━━━━━━━━━━━━━━\n`
+
+if(Object.keys(lowByCategory).length === 0){
+message += `✅ No low stock items\n`
+}else{
+
+for(const cat in lowByCategory){
+
+message += `\n📂 *${cat}*\n`
+message += lowByCategory[cat].join("\n")
+message += "\n"
+
 }
 
-const message =
-`📦 *INVENTORY STATUS REPORT*
+}
 
-━━━━━━━━━━━━━━
-🚨 *LOW STOCK ITEMS*
-━━━━━━━━━━━━━━
+// AVAILABLE SECTION
+message += `\n━━━━━━━━━━━━━━\n`
+message += `📦 *AVAILABLE STOCK*\n`
+message += `━━━━━━━━━━━━━━\n`
 
-${lowStock.length ? lowStock.join("\n") : "✅ None"}
+for(const cat in availableByCategory){
 
-━━━━━━━━━━━━━━
-📦 *AVAILABLE STOCK*
-━━━━━━━━━━━━━━
+message += `\n📂 *${cat}*\n`
+message += availableByCategory[cat].join("\n")
+message += "\n"
 
-${availableStock.length ? availableStock.join("\n") : "No items"}
+}
 
-━━━━━━━━━━━━━━
-⚡ *Action Required:* Restock low items immediately.
-`
+message += `\n⚡ *Please restock low items immediately.*`
 
-const url =
-`https://wa.me/?text=${encodeURIComponent(message)}`
+const url = `https://wa.me/?text=${encodeURIComponent(message)}`
 
 window.open(url,"_blank")
 
