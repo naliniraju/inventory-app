@@ -2,8 +2,8 @@
 const SUPABASE_URL="https://lmyizgwxxdfmwvwlvlum.supabase.co";
 const API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxteWl6Z3d4eGRmbXd2d2x2bHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2ODcwNTQsImV4cCI6MjA4ODI2MzA1NH0.7ffes53M8XXQuIAAS_80-RPqVHCI56NIyw79T3uxk2w"
 const TABLE="Stock";
-//const supabase = window.supabase.createClient(SUPABASE_URL, API_KEY);
-
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, API_KEY);
 let editId = null;
 //login///
 async function login(){
@@ -29,9 +29,9 @@ loadItems()
 }
 async function checkSession(){
 
-const { data: { session } } = await supabase.auth.getSession()
+const { data, error } = await supabaseClient.auth.getSession()
 
-if(session){
+if(data && data.session){
 document.getElementById("loginScreen").style.display="none"
 document.getElementById("dashboard").style.display="block"
 loadItems()
@@ -323,6 +323,33 @@ const url =
 
 window.open(url,"_blank")
 }
+async function loadCategories(){
+
+const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=category`,{
+headers:{
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+}
+})
+
+const data = await res.json()
+
+const categories = [...new Set(data.map(i => i.category))]
+
+const select = document.getElementById("categoryFilter")
+
+if(!select) return
+
+select.innerHTML = `<option value="">All Categories</option>`
+
+categories.forEach(cat=>{
+const opt = document.createElement("option")
+opt.value = cat
+opt.textContent = cat
+select.appendChild(opt)
+})
+
+}
 // --- Events ---
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -331,9 +358,13 @@ checkSession()
 document.getElementById("search")
 .addEventListener("input", loadItems)
 
-document.getElementById("categoryFilter")
-.addEventListener("change", loadItems)
+const categoryFilter = document.getElementById("categoryFilter")
+
+if(categoryFilter){
+categoryFilter.addEventListener("change", loadItems)
+}
 
 loadCategories()
+loadItems()
 
 })
