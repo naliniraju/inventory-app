@@ -349,6 +349,30 @@ select.appendChild(opt)
 })
 
 }
+////////////////////
+async function logout(){
+
+await supabaseClient.auth.signOut()
+
+document.getElementById("dashboard").style.display="none"
+document.getElementById("loginScreen").style.display="flex"
+
+}
+///////////////////////
+async function checkSession(){
+
+const { data } = await supabaseClient.auth.getSession()
+
+if(data.session){
+document.getElementById("loginScreen").style.display="none"
+document.getElementById("dashboard").style.display="block"
+loadItems()
+}else{
+document.getElementById("loginScreen").style.display="flex"
+document.getElementById("dashboard").style.display="none"
+}
+
+}
 // --- Events ---
 document.addEventListener("DOMContentLoaded", () => {
 

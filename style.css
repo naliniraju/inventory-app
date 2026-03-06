@@ -57,13 +57,13 @@ body {
 
 /* ---------- Table ---------- */
 .table-container {
-    max-height: 60vh;
+    height: calc(100vh - 160px);
     overflow-y: auto;
     margin: 20px;
+    margin-bottom: 50px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -225,4 +225,17 @@ cursor:pointer;
 
 .login-box button:hover{
 background:#005fd1;
+}
+.btn-logout{
+background:#ff3b3b;
+color:white;
+padding:8px 16px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:600;
+}
+
+.btn-logout:hover{
+background:#d62828;
 }
