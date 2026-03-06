@@ -55,33 +55,46 @@ async function loadItems() {
 }
 
 function renderTable(data){
-    const tableBody = document.getElementById("tableBody");
-    tableBody.innerHTML = "";
+  const tableBody = document.getElementById("tableBody");
+  tableBody.innerHTML = "";
 
-    data.forEach(i => {
-        // Convert to numbers to avoid string comparison issues
-        const available = Number(i.available_stock);
-        const minimum = Number(i.minimum_stock);
-        const isLow = available < minimum;
+  data.forEach(i => {
 
-        const row = document.createElement("tr");
-        if(isLow) row.classList.add("low");
+    const available = Number(i.available_stock);
+    const minimum = Number(i.minimum_stock);
+    const isLow = available < minimum;
 
-        row.innerHTML = `
-            <td>${i.item_name}</td>
-            <td>${i.category}</td>
-            <td>${available}</td>
-            <td>${minimum}</td>
-            <td>${i.units}</td>
-            <td>${isLow ? "Low" : "OK"}</td>
-            <td>
-                <button class="btn-edit" onclick='openModal(${JSON.stringify(i)})'>Edit</button>
-                <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
-            </td>
-        `;
+    const row = document.createElement("tr");
+    if(isLow) row.classList.add("low");
 
-        tableBody.appendChild(row);
-    });
+    row.innerHTML = `
+      <td contenteditable="true" onblur="updateField('${i.id}','item_name',this.innerText)">${i.item_name}</td>
+
+      <td contenteditable="true" onblur="updateField('${i.id}','category',this.innerText)">${i.category}</td>
+
+      <td>
+        <button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
+        <span class="qty">${available}</span>
+        <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
+      </td>
+
+      <td contenteditable="true" onblur="updateField('${i.id}','minimum_stock',this.innerText)">
+      ${minimum}
+      </td>
+
+      <td contenteditable="true" onblur="updateField('${i.id}','units',this.innerText)">
+      ${i.units}
+      </td>
+
+      <td>${isLow ? "Low" : "OK"}</td>
+
+      <td>
+        <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
+      </td>
+    `;
+
+    tableBody.appendChild(row);
+  });
 }
 // --- Save Item ---
 async function saveItem() {
@@ -149,13 +162,46 @@ async function deleteItem(id) {
         loadItems();
     }
 }
+//<!-------------------->
+async function updateField(id, field, value){
 
-// --- Low Stock Email Placeholder ---
-function sendLowStockEmail() {
-    alert("Frontend-only version: sending email requires a backend (Supabase Edge Functions).");
+  const payload = {}
+  payload[field] = value
+
+  await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+    method:"PATCH",
+    headers:{
+      "Content-Type":"application/json",
+      apikey:API_KEY,
+      Authorization:`Bearer ${API_KEY}`
+    },
+    body:JSON.stringify(payload)
+  })
+
+  showToast("Updated")
+  loadItems()
 }
+async function changeQty(id,newQty){
+
+  if(newQty < 0) newQty = 0
+
+  await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+    method:"PATCH",
+    headers:{
+      "Content-Type":"application/json",
+      apikey:API_KEY,
+      Authorization:`Bearer ${API_KEY}`
+    },
+    body:JSON.stringify({
+      available_stock:newQty
+    })
+  })
+
+  loadItems()
+}
+
 // --- Send WhatsApp Low Stock ---
-async function sendLowStockWhatsApp() {
+async function sendLowStockWhatsApp1() {
     // Fetch all items
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,available_stock,minimum_stock`, {
         headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
@@ -181,6 +227,36 @@ async function sendLowStockWhatsApp() {
     // Open WhatsApp link (WhatsApp Web or mobile app)
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
+}
+////////
+async function sendLowStockWhatsApp(){
+
+const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,available_stock,minimum_stock`,{
+headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
+})
+
+const data = await res.json()
+
+const lowItems = data
+.filter(i => i.available_stock < i.minimum_stock)
+.map(i => `• ${i.item_name} (${i.available_stock}/${i.minimum_stock})`)
+
+if(lowItems.length === 0){
+alert("No Low Stock Items")
+return
+}
+
+const message =
+`⚠️ *LOW STOCK ALERT*
+
+${lowItems.join("\n")}
+
+Please restock immediately.`
+
+const url =
+`https://wa.me/?text=${encodeURIComponent(message)}`
+
+window.open(url,"_blank")
 }
 // --- Events ---
 document.getElementById("search").addEventListener("input", loadItems);

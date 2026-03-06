@@ -156,3 +156,22 @@ tr.low td {
         max-height: 50vh;
     }
 }
+.qty-btn{
+background:#0077ff;
+color:white;
+border:none;
+padding:4px 8px;
+border-radius:4px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.qty-btn:hover{
+background:#005fd1;
+}
+
+.qty{
+margin:0 8px;
+font-weight:bold;
+font-size:15px;
+}
