@@ -301,26 +301,51 @@ headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
 
 const data = await res.json()
 
-const lowItems = data
-.filter(i => i.available_stock < i.minimum_stock)
-.map(i => `• ${i.item_name} (${i.available_stock}/${i.minimum_stock})`)
+const lowStock = []
+const availableStock = []
 
-if(lowItems.length === 0){
-alert("No Low Stock Items")
+data.forEach(i=>{
+
+const available = Number(i.available_stock)
+const minimum = Number(i.minimum_stock)
+
+if(available < minimum){
+lowStock.push(`⚠️ *${i.item_name}*  (${available}/${minimum})`)
+}else{
+availableStock.push(`✅ *${i.item_name}*  (${available})`)
+}
+
+})
+
+if(lowStock.length === 0 && availableStock.length === 0){
+alert("No inventory data")
 return
 }
 
 const message =
-`⚠️ *LOW STOCK ALERT*
+`📦 *INVENTORY STATUS REPORT*
 
-${lowItems.join("\n")}
+━━━━━━━━━━━━━━
+🚨 *LOW STOCK ITEMS*
+━━━━━━━━━━━━━━
 
-Please restock immediately.`
+${lowStock.length ? lowStock.join("\n") : "✅ None"}
+
+━━━━━━━━━━━━━━
+📦 *AVAILABLE STOCK*
+━━━━━━━━━━━━━━
+
+${availableStock.length ? availableStock.join("\n") : "No items"}
+
+━━━━━━━━━━━━━━
+⚡ *Action Required:* Restock low items immediately.
+`
 
 const url =
 `https://wa.me/?text=${encodeURIComponent(message)}`
 
 window.open(url,"_blank")
+
 }
 async function loadCategories(){
 
