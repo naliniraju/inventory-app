@@ -42,16 +42,32 @@ function showToast(msg) {
 }
 
 // --- CRUD ---
-async function loadItems() {
-    const search = document.getElementById("search").value || "";
-    let url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*`;
-    if (search) url += `&item_name=ilike.*${search}*`;
+async function loadItems(){
 
-    const res = await fetch(url, {
-        headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
-    });
-    const data = await res.json();
-    renderTable(data);
+const search = document.getElementById("search").value || "";
+const category = document.getElementById("categoryFilter").value || "";
+
+let url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*`;
+
+if (search) {
+url += `&or=(item_name.ilike.*${search}*,category.ilike.*${search}*)`;
+}
+
+if(category){
+url += `&category=eq.${category}`;
+}
+
+const res = await fetch(url,{
+headers:{
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+}
+})
+
+const data = await res.json()
+
+renderTable(data)
+
 }
 
 function renderTable(data){
@@ -95,6 +111,22 @@ function renderTable(data){
 
     tableBody.appendChild(row);
   });
+}
+//////////////////
+function populateCategoryFilter(data){
+
+const select = document.getElementById("categoryFilter")
+
+let categories = [...new Set(data.map(i => i.category))]
+
+select.innerHTML = `<option value="">All Categories</option>`
+
+categories.forEach(cat=>{
+const opt = document.createElement("option")
+opt.value = cat
+opt.textContent = cat
+select.appendChild(opt)
+})
 }
 // --- Save Item ---
 async function saveItem() {
@@ -259,5 +291,14 @@ const url =
 window.open(url,"_blank")
 }
 // --- Events ---
-document.getElementById("search").addEventListener("input", loadItems);
-document.addEventListener("DOMContentLoaded", loadItems);
+document.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("search")
+    .addEventListener("input", loadItems);
+
+  document.getElementById("categoryFilter")
+    .addEventListener("change", loadItems);
+
+  loadItems();
+
+});

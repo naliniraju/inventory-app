@@ -175,3 +175,11 @@ margin:0 8px;
 font-weight:bold;
 font-size:15px;
 }
+#categoryFilter{
+padding:8px 12px;
+border-radius:6px;
+border:none;
+font-size:16px;
+background:white;
+min-width:180px;
+}
