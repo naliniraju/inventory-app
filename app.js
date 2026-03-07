@@ -127,7 +127,7 @@ function renderTable(data){
     if(rowClass) row.classList.add(rowClass);
 
     row.innerHTML = `
-      <td contenteditable="true" onblur="updateField('${i.id}','item_name',this.innerText)">
+      <td contenteditable="true" onchange="updateField('${i.id}','available_stock',this.value)">
         ${i.item_name}
       </td>
 
@@ -254,8 +254,28 @@ async function deleteItem(id) {
 //<!-------------------->
 async function updateField(id, field, value){
 
-if(field === "available_stock" || field === "minimum_stock"){
-value = Number(value)
+value = value.trim()
+
+// Get current row value from table
+const row = event.target.closest("tr")
+let currentValue = ""
+
+if(field === "item_name"){
+currentValue = row.children[0].innerText.trim()
+}
+else if(field === "category"){
+currentValue = row.children[1].innerText.trim()
+}
+else if(field === "minimum_stock"){
+currentValue = row.children[3].innerText.trim()
+}
+else if(field === "units"){
+currentValue = row.children[4].innerText.trim()
+}
+
+// If value not changed → stop
+if(String(currentValue) === String(value)){
+return
 }
 
 const payload = {}
@@ -273,7 +293,6 @@ body:JSON.stringify(payload)
 
 showToast("Updated")
 loadItems()
-
 }
 async function changeQty(id,newQty){
 
