@@ -258,3 +258,14 @@ background:#ffe5e5;
 color:#b30000;
 font-weight:bold;
 }
+tr.out-stock td{
+background:#ff3b3b !important;
+color:white;
+font-weight:bold;
+animation: blink 1.2s infinite alternate;
+}
+
+/*@keyframes blink{
+from{opacity:1}
+to{opacity:0.85}
+}*/
