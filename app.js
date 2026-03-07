@@ -127,11 +127,11 @@ function renderTable(data){
     if(rowClass) row.classList.add(rowClass);
 
     row.innerHTML = `
-      <td contenteditable="true" onchange="updateField('${i.id}','available_stock',this.value)">
+      <td>
         ${i.item_name}
       </td>
 
-      <td contenteditable="true" onblur="updateField('${i.id}','category',this.innerText)">
+      <td>
         ${i.category}
       </td>
 
@@ -152,7 +152,7 @@ function renderTable(data){
         ${minimum}
       </td>
 
-      <td contenteditable="true" onblur="updateField('${i.id}','units',this.innerText)">
+      <td>
         ${i.units}
       </td>
 
