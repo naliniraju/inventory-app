@@ -112,22 +112,19 @@ function renderTable(data){
     const minimum = Number(i.minimum_stock);
 
     let status = "OK";
+    let rowClass = "";
 
     if(available === 0){
       status = "Out of Stock";
+      rowClass = "out-stock";
     }
     else if(available <= minimum){
       status = "Low";
+      rowClass = "low";
     }
 
     const row = document.createElement("tr");
-
-    if(available === 0){
-      row.classList.add("out-stock");
-    }
-    else if(available <= minimum){
-      row.classList.add("low");
-    }
+    if(rowClass) row.classList.add(rowClass);
 
     row.innerHTML = `
       <td contenteditable="true" onblur="updateField('${i.id}','item_name',this.innerText)">
@@ -159,10 +156,10 @@ function renderTable(data){
         ${i.units}
       </td>
 
-    <td>
-${status === "Out of Stock" ? "❌ Out of Stock" : 
-  status === "Low" ? "⚠️ Low" : "✅ OK"}
-</td>
+      <td>
+        ${status === "Out of Stock" ? "❌ Out of Stock" :
+          status === "Low" ? "⚠️ Low" : "✅ OK"}
+      </td>
 
       <td>
         <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
