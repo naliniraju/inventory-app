@@ -148,9 +148,11 @@ function renderTable(data){
         <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
       </td>
 
-      <td contenteditable="true" onblur="updateField('${i.id}','minimum_stock',this.innerText)">
-        ${minimum}
-      </td>
+    <td contenteditable="true"
+    onfocus="storeOldValue(this)"
+    onblur="updateField('${i.id}','minimum_stock',this)">
+  ${minimum}
+</td>
 
       <td>
         ${i.units}
@@ -252,34 +254,18 @@ async function deleteItem(id) {
     }
 }
 //<!-------------------->
-async function updateField(id, field, value){
+async function updateField(id, field, el){
 
-value = value.trim()
+const newValue = el.innerText.trim()
+const oldValue = el.dataset.oldValue || ""
 
-// Get current row value from table
-const row = event.target.closest("tr")
-let currentValue = ""
-
-if(field === "item_name"){
-currentValue = row.children[0].innerText.trim()
-}
-else if(field === "category"){
-currentValue = row.children[1].innerText.trim()
-}
-else if(field === "minimum_stock"){
-currentValue = row.children[3].innerText.trim()
-}
-else if(field === "units"){
-currentValue = row.children[4].innerText.trim()
-}
-
-// If value not changed → stop
-if(String(currentValue) === String(value)){
+// Stop if value did not change
+if(newValue === oldValue){
 return
 }
 
 const payload = {}
-payload[field] = value
+payload[field] = newValue
 
 await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
 method:"PATCH",
@@ -293,6 +279,7 @@ body:JSON.stringify(payload)
 
 showToast("Updated")
 loadItems()
+
 }
 async function changeQty(id,newQty){
 
@@ -465,6 +452,10 @@ document.getElementById("loginScreen").style.display="flex"
 document.getElementById("dashboard").style.display="none"
 }
 
+}
+/////////
+function storeOldValue(el){
+  el.dataset.oldValue = el.innerText.trim()
 }
 // --- Events ---
 document.addEventListener("DOMContentLoaded", () => {
