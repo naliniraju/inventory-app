@@ -110,31 +110,59 @@ function renderTable(data){
 
     const available = Number(i.available_stock);
     const minimum = Number(i.minimum_stock);
-    const isLow = available < minimum;
+
+    let status = "OK";
+
+    if(available === 0){
+      status = "Out of Stock";
+    }
+    else if(available <= minimum){
+      status = "Low";
+    }
 
     const row = document.createElement("tr");
-    if(isLow) row.classList.add("low");
+
+    if(available === 0){
+      row.classList.add("out-stock");
+    }
+    else if(available <= minimum){
+      row.classList.add("low");
+    }
 
     row.innerHTML = `
-      <td contenteditable="true" onblur="updateField('${i.id}','item_name',this.innerText)">${i.item_name}</td>
+      <td contenteditable="true" onblur="updateField('${i.id}','item_name',this.innerText)">
+        ${i.item_name}
+      </td>
 
-      <td contenteditable="true" onblur="updateField('${i.id}','category',this.innerText)">${i.category}</td>
+      <td contenteditable="true" onblur="updateField('${i.id}','category',this.innerText)">
+        ${i.category}
+      </td>
 
       <td>
         <button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
-        <span class="qty">${available}</span>
+
+        <input 
+          class="qty-input"
+          type="number"
+          value="${available}"
+          onblur="updateField('${i.id}','available_stock',this.value)"
+        />
+
         <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
       </td>
 
       <td contenteditable="true" onblur="updateField('${i.id}','minimum_stock',this.innerText)">
-      ${minimum}
+        ${minimum}
       </td>
 
       <td contenteditable="true" onblur="updateField('${i.id}','units',this.innerText)">
-      ${i.units}
+        ${i.units}
       </td>
 
-      <td>${isLow ? "Low" : "OK"}</td>
+    <td>
+${status === "Out of Stock" ? "❌ Out of Stock" : 
+  status === "Low" ? "⚠️ Low" : "✅ OK"}
+</td>
 
       <td>
         <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
@@ -229,21 +257,26 @@ async function deleteItem(id) {
 //<!-------------------->
 async function updateField(id, field, value){
 
-  const payload = {}
-  payload[field] = value
+if(field === "available_stock" || field === "minimum_stock"){
+value = Number(value)
+}
 
-  await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
-    method:"PATCH",
-    headers:{
-      "Content-Type":"application/json",
-      apikey:API_KEY,
-      Authorization:`Bearer ${API_KEY}`
-    },
-    body:JSON.stringify(payload)
-  })
+const payload = {}
+payload[field] = value
 
-  showToast("Updated")
-  loadItems()
+await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+method:"PATCH",
+headers:{
+"Content-Type":"application/json",
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+},
+body:JSON.stringify(payload)
+})
+
+showToast("Updated")
+loadItems()
+
 }
 async function changeQty(id,newQty){
 

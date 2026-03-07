@@ -239,3 +239,22 @@ font-weight:600;
 .btn-logout:hover{
 background:#d62828;
 }
+.qty-input{
+width:60px;
+text-align:center;
+padding:4px;
+border:1px solid #ccc;
+border-radius:4px;
+font-weight:bold;
+}
+tr.out-stock{
+background:#ff3b3b;
+color:white;
+font-weight:bold;
+}
+
+tr.low{
+background:#ffe5e5;
+color:#b30000;
+font-weight:bold;
+}
