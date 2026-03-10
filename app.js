@@ -334,7 +334,7 @@ async function sendLowStockWhatsApp1() {
 ////////
 async function sendLowStockWhatsApp(){
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,category,available_stock,minimum_stock`,{
+const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,category,available_stock,minimum_stock,unit`,{
 headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
 })
 
@@ -348,18 +348,19 @@ data.forEach(i=>{
 const cat = i.category || "Other"
 const available = Number(i.available_stock)
 const minimum = Number(i.minimum_stock)
+const unit = i.unit || ""
 
 if(available < minimum){
 
 if(!lowByCategory[cat]) lowByCategory[cat] = []
 
-lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available}/${minimum})`)
+lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available} ${unit}/${minimum} ${unit})`)
 
 }else{
 
 if(!availableByCategory[cat]) availableByCategory[cat] = []
 
-availableByCategory[cat].push(`✅ *${i.item_name}* (${available})`)
+availableByCategory[cat].push(`✅ *${i.item_name}* (${available} ${unit})`)
 
 }
 
