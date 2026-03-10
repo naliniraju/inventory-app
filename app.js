@@ -203,12 +203,13 @@ async function saveItem() {
 
   // Only send the exact fields that exist in your table
 //  const payload = { item_name, category, available_stock, minimum_stock, units };
-<input 
-class="qty-input"
-type="number"
-value="${available}"
-onblur="updateField('${i.id}','available_stock',this)"
-/>
+const payload = { 
+item_name, 
+category, 
+available_stock:Number(available_stock), 
+minimum_stock:Number(minimum_stock), 
+units 
+};
   let url = `${SUPABASE_URL}/rest/v1/${TABLE}`;
   let method = "POST";
 
@@ -261,21 +262,17 @@ async function deleteItem(id) {
 //<!-------------------->
 async function updateField(id, field, el){
 
-let newValue;
+let newValue = el.value !== undefined ? el.value : el.innerText.trim()
+const oldValue = el.dataset.oldValue || ""
 
-// detect if input or contenteditable
-if(el.tagName === "INPUT"){
-  newValue = el.value.trim()
-}else{
-  newValue = el.innerText.trim()
+if(newValue === oldValue){
+return
 }
-
-if(newValue === "") return
 
 const payload = {}
 payload[field] = Number(newValue)
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
 method:"PATCH",
 headers:{
 "Content-Type":"application/json",
@@ -285,12 +282,9 @@ Authorization:`Bearer ${API_KEY}`
 body:JSON.stringify(payload)
 })
 
-if(res.ok){
-  showToast("Updated")
-  loadItems()
-}else{
-  console.error(await res.text())
-}
+showToast("Updated")
+loadItems()
+
 }
 
 async function changeQty(id,newQty){
