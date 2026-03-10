@@ -354,12 +354,12 @@ if(available < minimum){
 
 if(!lowByCategory[cat]) lowByCategory[cat] = []
 
-lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available} ${unit}/${minimum} ${unit})`)
+lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available} ${units}/${minimum} ${units})`)
 }else{
 
 if(!availableByCategory[cat]) availableByCategory[cat] = []
 
-availableByCategory[cat].push(`✅ *${i.item_name}* (${available} ${unit})`)
+availableByCategory[cat].push(`✅ *${i.item_name}* (${available} ${units})`)
 }
 
 })
