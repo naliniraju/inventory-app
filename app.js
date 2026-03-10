@@ -202,8 +202,14 @@ async function saveItem() {
   }
 
   // Only send the exact fields that exist in your table
-  const payload = { item_name, category, available_stock, minimum_stock, units };
-
+//  const payload = { item_name, category, available_stock, minimum_stock, units };
+const payload = { 
+item_name, 
+category, 
+available_stock:Number(available_stock), 
+minimum_stock:Number(minimum_stock), 
+units 
+};
   let url = `${SUPABASE_URL}/rest/v1/${TABLE}`;
   let method = "POST";
 
