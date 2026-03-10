@@ -269,3 +269,14 @@ animation: blink 1.2s infinite alternate;
 from{opacity:1}
 to{opacity:0.85}
 }*/
+td span[contenteditable]{
+padding:4px 8px;
+border-radius:4px;
+min-width:40px;
+display:inline-block;
+}
+
+td span[contenteditable]:focus{
+outline:2px solid #0077ff;
+background:#eef5ff;
+}

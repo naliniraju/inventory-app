@@ -135,18 +135,17 @@ function renderTable(data){
         ${i.category}
       </td>
 
-      <td>
-        <button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
+  <td>
+  <button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
 
-        <input 
-          class="qty-input"
-          type="number"
-          value="${available}"
-          onblur="updateField('${i.id}','available_stock',this.value)"
-        />
+  <span contenteditable="true"
+        onfocus="storeOldValue(this)"
+        onblur="updateField('${i.id}','available_stock',this)">
+        ${available}
+  </span>
 
-        <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
-      </td>
+  <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
+</td>
 
     <td contenteditable="true"
     onfocus="storeOldValue(this)"
@@ -262,12 +261,10 @@ async function deleteItem(id) {
 //<!-------------------->
 async function updateField(id, field, el){
 
-let newValue = el.value !== undefined ? el.value : el.innerText.trim()
+const newValue = el.innerText.trim()
 const oldValue = el.dataset.oldValue || ""
 
-if(newValue === oldValue){
-return
-}
+if(newValue === oldValue) return
 
 const payload = {}
 payload[field] = Number(newValue)
