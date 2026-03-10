@@ -65,7 +65,13 @@
     <h2 id="modalTitle">Add Item</h2>
     <input id="modalItem" placeholder="Item Name">
     <input id="modalCategory" placeholder="Category">
-    <input id="modalAvailableStock" type="number" placeholder="Available Stock">
+  <!--  <input id="modalAvailableStock" type="number" placeholder="Available Stock">-->
+    <input 
+class="qty-input"
+type="number"
+value="${available}"
+onblur="updateField('${i.id}','available_stock',this)"
+/>
     <input id="modalMinStock" type="number" placeholder="Minimum Stock">
     <input id="modalUnits" placeholder="Units">
     <div class="modal-actions">
