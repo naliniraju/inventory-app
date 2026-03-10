@@ -256,16 +256,15 @@ async function deleteItem(id) {
 //<!-------------------->
 async function updateField(id, field, el){
 
-const newValue = el.innerText.trim()
+let newValue = el.value !== undefined ? el.value : el.innerText.trim()
 const oldValue = el.dataset.oldValue || ""
 
-// Stop if value did not change
 if(newValue === oldValue){
 return
 }
 
 const payload = {}
-payload[field] = newValue
+payload[field] = Number(newValue)
 
 await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
 method:"PATCH",
@@ -281,6 +280,7 @@ showToast("Updated")
 loadItems()
 
 }
+
 async function changeQty(id,newQty){
 
   if(newQty < 0) newQty = 0
