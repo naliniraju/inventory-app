@@ -376,15 +376,17 @@ padding:5px 8px;
 }
 
 }
-/* ---------- Portrait Mode Quantity Fix ---------- */
+/* ---------- Portrait Quantity Layout ---------- */
 
 @media (orientation: portrait){
 
 .qty-control{
 display:flex;
+flex-direction:column;
 align-items:center;
 justify-content:center;
-gap:4px;
+gap:3px;
+min-width:40px;
 }
 
 .qty-btn{
@@ -392,16 +394,20 @@ width:24px;
 height:24px;
 font-size:14px;
 padding:0;
+line-height:24px;
 flex-shrink:0;
 }
 
 .qty-value{
-min-width:40px;
-max-width:55px;
+min-width:38px;
+max-width:50px;
 font-size:13px;
 text-align:center;
 overflow:hidden;
 white-space:nowrap;
 }
 
+}
+.qty-btn{
+touch-action: manipulation;
 }
