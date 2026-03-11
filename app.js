@@ -1,276 +1,307 @@
 // ---------- CONFIG ----------
 const SUPABASE_URL="https://lmyizgwxxdfmwvwlvlum.supabase.co";
-const API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxteWl6Z3d4eGRmbXd2d2x2bHVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2ODcwNTQsImV4cCI6MjA4ODI2MzA1NH0.7ffes53M8XXQuIAAS_80-RPqVHCI56NIyw79T3uxk2w"
+const API_KEY="YOUR_PUBLIC_ANON_KEY";
 const TABLE="Stock";
-const supabaseClient = supabase.createClient(SUPABASE_URL, API_KEY)
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, API_KEY);
+
 let editId = null;
-//login///
+let realtimeChannel = null;
+
+// ---------- LOGIN ----------
 async function login(){
 
 const email = document.getElementById("loginEmail").value
 const password = document.getElementById("loginPassword").value
 
-const { data, error } = await supabaseClient.auth.signInWithPassword({
-email: email,
-password: password
+const { error } = await supabaseClient.auth.signInWithPassword({
+email,
+password
 })
 
 if(error){
-alert("Login failed: " + error.message)
+alert("Login failed: "+error.message)
 return
 }
 
-document.getElementById("loginScreen").style.display = "none"
-document.getElementById("dashboard").style.display = "block"
-
-loadItems()
-
-}
-async function checkSession(){
-
-const { data, error } = await supabaseClient.auth.getSession()
-
-if(data && data.session){
 document.getElementById("loginScreen").style.display="none"
 document.getElementById("dashboard").style.display="block"
+
+startApp()
+
+}
+
+// ---------- SESSION ----------
+async function checkSession(){
+
+const { data } = await supabaseClient.auth.getSession()
+
+if(data.session){
+document.getElementById("loginScreen").style.display="none"
+document.getElementById("dashboard").style.display="block"
+startApp()
+}else{
+document.getElementById("loginScreen").style.display="flex"
+document.getElementById("dashboard").style.display="none"
+}
+
+}
+
+// ---------- START APP ----------
+function startApp(){
+
+loadCategories()
 loadItems()
+enableRealtime()
+
+}
+
+// ---------- MODAL ----------
+function openModal(data=null){
+
+document.getElementById("modal").style.display="flex"
+
+if(data){
+
+document.getElementById("modalTitle").innerText="Edit Item"
+document.getElementById("modalItem").value=data.item_name
+document.getElementById("modalCategory").value=data.category
+document.getElementById("modalAvailableStock").value=data.available_stock
+document.getElementById("modalMinStock").value=data.minimum_stock
+document.getElementById("modalUnits").value=data.units
+
+editId=data.id
+
+}else{
+
+document.getElementById("modalTitle").innerText="Add Item"
+
+document.getElementById("modalItem").value=""
+document.getElementById("modalCategory").value=""
+document.getElementById("modalAvailableStock").value=""
+document.getElementById("modalMinStock").value=""
+document.getElementById("modalUnits").value=""
+
+editId=null
 }
 
 }
 
-// --- Modal Functions ---
-function openModal(data = null) {
-    document.getElementById("modal").style.display = "flex";
-    if (data) {
-        document.getElementById("modalTitle").innerText = "Edit Item";
-        document.getElementById("modalItem").value = data.item_name;
-        document.getElementById("modalCategory").value = data.category;
-        document.getElementById("modalAvailableStock").value = data.available_stock;
-        document.getElementById("modalMinStock").value = data.minimum_stock;
-        document.getElementById("modalUnits").value = data.units;
-        editId = data.id;
-    } else {
-        document.getElementById("modalTitle").innerText = "Add Item";
-        document.getElementById("modalItem").value = "";
-        document.getElementById("modalCategory").value = "";
-       // document.getElementById("modalQty").value = "";
-        document.getElementById("modalAvailableStock").value = "";
-        document.getElementById("modalMinStock").value = "";
-        document.getElementById("modalUnits").value = "";
-        editId = null;
-    }
+function closeModal(){
+document.getElementById("modal").style.display="none"
 }
 
-function closeModal() { document.getElementById("modal").style.display = "none"; }
+// ---------- TOAST ----------
+function showToast(msg){
 
-function showToast(msg) {
-    Toastify({
-        text: msg,
-        duration: 2500,
-        gravity: "top",
-        position: "right",
-        style: { background: "#00c853" }
-    }).showToast();
+Toastify({
+text:msg,
+duration:2500,
+gravity:"top",
+position:"right",
+style:{background:"#00c853"}
+}).showToast()
+
 }
 
-// --- CRUD ---
+// ---------- LOAD ITEMS ----------
 async function loadItems(){
 
-const search = document.getElementById("search").value || "";
-const category = document.getElementById("categoryFilter").value || "";
+const tableBody=document.getElementById("tableBody")
 
-// FIX: stable ordering
-let url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=id.asc`;
+tableBody.innerHTML="<tr><td colspan='7'>Loading...</td></tr>"
 
-if (search) {
-url += `&or=(item_name.ilike.*${search}*,category.ilike.*${search}*)`;
+const search=document.getElementById("search").value || ""
+const category=document.getElementById("categoryFilter").value || ""
+
+// stable ordering prevents row jumping
+let url=`${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=id.asc`
+
+if(search){
+url+=`&or=(item_name.ilike.*${search}*,category.ilike.*${search}*)`
 }
 
 if(category){
-url += `&category=eq.${category}`;
+url+=`&category=eq.${category}`
 }
 
-const res = await fetch(url,{
+const res=await fetch(url,{
 headers:{
 apikey:API_KEY,
 Authorization:`Bearer ${API_KEY}`
 }
 })
 
-const data = await res.json()
+const data=await res.json()
 
 renderTable(data)
 
 }
 
+// ---------- RENDER TABLE ----------
 function renderTable(data){
-  const tableBody = document.getElementById("tableBody");
-  tableBody.innerHTML = "";
 
-  data.forEach(i => {
+const tableBody=document.getElementById("tableBody")
+tableBody.innerHTML=""
 
-    const available = Number(i.available_stock);
-    const minimum = Number(i.minimum_stock);
+data.forEach(i=>{
 
-    let status = "OK";
-    let rowClass = "";
+const available=Number(i.available_stock)
+const minimum=Number(i.minimum_stock)
 
-    if(available === 0){
-      status = "Out of Stock";
-      rowClass = "out-stock";
-    }
-    else if(available <= minimum){
-      status = "Low";
-      rowClass = "low";
-    }
+let status="OK"
+let rowClass=""
 
-    const row = document.createElement("tr");
-    if(rowClass) row.classList.add(rowClass);
-
-    row.innerHTML = `
-      <td>
-        ${i.item_name}
-      </td>
-
-      <td>
-        ${i.category}
-      </td>
-
-  <td>
-  <button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
-
-  <span contenteditable="true"
-        onfocus="storeOldValue(this)"
-        onblur="updateField('${i.id}','available_stock',this)">
-        ${available}
-  </span>
-
-  <button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
-</td>
-
-    <td contenteditable="true"
-    onfocus="storeOldValue(this)"
-    onblur="updateField('${i.id}','minimum_stock',this)">
-  ${minimum}
-</td>
-
-      <td>
-        ${i.units}
-      </td>
-
-      <td>
-        ${status === "Out of Stock" ? "❌ Out of Stock" :
-          status === "Low" ? "⚠️ Low" : "✅ OK"}
-      </td>
-
-      <td>
-        <button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
-      </td>
-    `;
-
-    tableBody.appendChild(row);
-  });
+if(available===0){
+status="Out of Stock"
+rowClass="out-stock"
 }
-//////////////////
-function populateCategoryFilter(data){
+else if(available<=minimum){
+status="Low"
+rowClass="low"
+}
 
-const select = document.getElementById("categoryFilter")
+const row=document.createElement("tr")
 
-let categories = [...new Set(data.map(i => i.category))]
+if(rowClass) row.classList.add(rowClass)
 
-select.innerHTML = `<option value="">All Categories</option>`
+row.innerHTML=`
 
-categories.forEach(cat=>{
-const opt = document.createElement("option")
-opt.value = cat
-opt.textContent = cat
-select.appendChild(opt)
+<td>${i.item_name}</td>
+
+<td>${i.category}</td>
+
+<td>
+
+<button class="qty-btn" onclick="changeQty('${i.id}',${available-1})">-</button>
+
+<span contenteditable="true"
+onfocus="storeOldValue(this)"
+onblur="updateField('${i.id}','available_stock',this)">
+${available}
+</span>
+
+<button class="qty-btn" onclick="changeQty('${i.id}',${available+1})">+</button>
+
+</td>
+
+<td contenteditable="true"
+onfocus="storeOldValue(this)"
+onblur="updateField('${i.id}','minimum_stock',this)">
+${minimum}
+</td>
+
+<td>${i.units}</td>
+
+<td>
+
+${status==="Out of Stock"?"❌ Out of Stock":
+status==="Low"?"⚠️ Low":"✅ OK"}
+
+</td>
+
+<td>
+<button class="btn-delete" onclick="deleteItem('${i.id}')">Delete</button>
+</td>
+
+`
+
+tableBody.appendChild(row)
+
 })
-}
-// --- Save Item ---
-async function saveItem() {
-  const item_name = document.getElementById("modalItem").value.trim();
-  const category = document.getElementById("modalCategory").value.trim();
-  const available_stock = Number(document.getElementById("modalAvailableStock").value);
-  const minimum_stock = Number(document.getElementById("modalMinStock").value);
-  const units = document.getElementById("modalUnits").value.trim();
 
-  // Validate all fields
-  if(!item_name || !category || !units || isNaN(available_stock) || isNaN(minimum_stock)){
-    alert("Please fill all fields correctly.");
-    return;
-  }
-
-  // Only send the exact fields that exist in your table
-//  const payload = { item_name, category, available_stock, minimum_stock, units };
-const payload = { 
-item_name, 
-category, 
-available_stock:Number(available_stock), 
-minimum_stock:Number(minimum_stock), 
-units 
-};
-  let url = `${SUPABASE_URL}/rest/v1/${TABLE}`;
-  let method = "POST";
-
-  if(editId){
-    url += `?id=eq.${editId}`;
-    method = "PATCH";
-  }
-
-  const res = await fetch(url, {
-    method: method,
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": API_KEY,
-      "Authorization": `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if(!res.ok){
-    const errorData = await res.text(); // or await res.json() if JSON
-    console.error("Supabase error:", errorData);
-    alert("Error saving item. Check console for details.");
-    return;
-  }
-
-  showToast(editId ? "Item updated" : "Item added");
-  closeModal();
-  loadItems();
-}
-// --- Edit helper ---
-async function openModalById(id) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`, {
-        headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
-    });
-    const data = await res.json();
-    openModal(data[0]);
 }
 
-// --- Delete ---
-async function deleteItem(id) {
-    if (confirm("Are you sure to delete this item?")) {
-        await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`, {
-            method: "DELETE",
-            headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
-        });
-        showToast("Item deleted");
-        loadItems();
-    }
+// ---------- SAVE ITEM ----------
+async function saveItem(){
+
+const item_name=document.getElementById("modalItem").value.trim()
+const category=document.getElementById("modalCategory").value.trim()
+const available_stock=Number(document.getElementById("modalAvailableStock").value)
+const minimum_stock=Number(document.getElementById("modalMinStock").value)
+const units=document.getElementById("modalUnits").value.trim()
+
+if(!item_name || !category || !units || isNaN(available_stock) || isNaN(minimum_stock)){
+alert("Please fill all fields")
+return
 }
-//<!-------------------->
-async function updateField(id, field, el){
 
-const newValue = el.innerText.trim()
-const oldValue = el.dataset.oldValue || ""
+const payload={
+item_name,
+category,
+available_stock,
+minimum_stock,
+units
+}
 
-if(newValue === oldValue) return
+let url=`${SUPABASE_URL}/rest/v1/${TABLE}`
+let method="POST"
 
-const payload = {}
-payload[field] = Number(newValue)
+if(editId){
+url+=`?id=eq.${editId}`
+method="PATCH"
+}
+
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+},
+body:JSON.stringify(payload)
+})
+
+if(!res.ok){
+showToast("Error saving item")
+return
+}
+
+showToast(editId?"Item updated":"Item added")
+
+closeModal()
+
+loadItems()
+loadCategories()
+
+}
+
+// ---------- DELETE ----------
+async function deleteItem(id){
+
+if(!confirm("Delete this item?")) return
 
 await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+method:"DELETE",
+headers:{
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+}
+})
+
+showToast("Item deleted")
+
+loadItems()
+
+}
+
+// ---------- INLINE UPDATE ----------
+async function updateField(id,field,el){
+
+const newValue=el.innerText.trim()
+const oldValue=el.dataset.oldValue || ""
+
+if(newValue===oldValue) return
+
+if(isNaN(newValue)){
+el.innerText=oldValue
+return
+}
+
+const payload={}
+payload[field]=Number(newValue)
+
+const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
 method:"PATCH",
 headers:{
 "Content-Type":"application/json",
@@ -280,160 +311,169 @@ Authorization:`Bearer ${API_KEY}`
 body:JSON.stringify(payload)
 })
 
+if(!res.ok){
+el.innerText=oldValue
+showToast("Update failed")
+return
+}
+
 showToast("Updated")
-loadItems()
 
 }
 
+// ---------- CHANGE QTY ----------
 async function changeQty(id,newQty){
 
-  if(newQty < 0) newQty = 0
+if(newQty<0) newQty=0
 
-  await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
-    method:"PATCH",
-    headers:{
-      "Content-Type":"application/json",
-      apikey:API_KEY,
-      Authorization:`Bearer ${API_KEY}`
-    },
-    body:JSON.stringify({
-      available_stock:newQty
-    })
-  })
-
-  const span = document.querySelector(`[onclick="changeQty('${id}',${newQty})"]`).parentElement.querySelector("span")
-if(span) span.innerText = newQty
-}
-
-// --- Send WhatsApp Low Stock ---
-async function sendLowStockWhatsApp1() {
-    // Fetch all items
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,available_stock,minimum_stock`, {
-        headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` }
-    });
-    const data = await res.json();
-    
-    // Filter low-stock items
-    const lowItems = data
-        .filter(i => Number(i.available_stock) < Number(i.minimum_stock))
-        .map(i => `${i.item_name} (${i.available_stock}/${i.minimum_stock})`);
-    
-    if(lowItems.length === 0){
-        alert("✅ No low-stock items.");
-        return;
-    }
-
-    // Compose WhatsApp message
-    const message = `⚠️ Low Stock Alert:\n${lowItems.join("\n")}`;
-
-    // Replace with your WhatsApp number (country code, no +)
-    const phoneNumber = "917760530532"; 
-
-    // Open WhatsApp link (WhatsApp Web or mobile app)
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-}
-////////
-async function sendLowStockWhatsApp(){
-
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,category,available_stock,minimum_stock,units`,{
-headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
+await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${id}`,{
+method:"PATCH",
+headers:{
+"Content-Type":"application/json",
+apikey:API_KEY,
+Authorization:`Bearer ${API_KEY}`
+},
+body:JSON.stringify({
+available_stock:newQty
+})
 })
 
-const data = await res.json()
-
-const lowByCategory = {}
-const availableByCategory = {}
-
-data.forEach(i=>{
-
-const cat = i.category || "Other"
-const available = Number(i.available_stock)
-const minimum = Number(i.minimum_stock)
-const units = i.units || ""
-
-if(available < minimum){
-
-if(!lowByCategory[cat]) lowByCategory[cat] = []
-
-lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available} ${units}/${minimum} ${units})`)
-}else{
-
-if(!availableByCategory[cat]) availableByCategory[cat] = []
-
-availableByCategory[cat].push(`✅ *${i.item_name}* (${available} ${units})`)
 }
 
-})
-
-let message = `📦 *INVENTORY REPORT*\n\n`
-
-// LOW STOCK SECTION
-message += `🚨 *LOW STOCK ITEMS*\n`
-message += `━━━━━━━━━━━━━━\n`
-
-if(Object.keys(lowByCategory).length === 0){
-message += `✅ No low stock items\n`
-}else{
-
-for(const cat in lowByCategory){
-
-message += `\n📂 *${cat}*\n`
-message += lowByCategory[cat].join("\n")
-message += "\n"
-
-}
-
-}
-
-// AVAILABLE SECTION
-message += `\n━━━━━━━━━━━━━━\n`
-message += `📦 *AVAILABLE STOCK*\n`
-message += `━━━━━━━━━━━━━━\n`
-
-for(const cat in availableByCategory){
-
-message += `\n📂 *${cat}*\n`
-message += availableByCategory[cat].join("\n")
-message += "\n"
-
-}
-
-message += `\n⚡ *Please restock low items immediately.*`
-
-const url = `https://wa.me/?text=${encodeURIComponent(message)}`
-
-window.open(url,"_blank")
-
-}
+// ---------- CATEGORY FILTER ----------
 async function loadCategories(){
 
-const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=category`,{
+const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=category`,{
 headers:{
 apikey:API_KEY,
 Authorization:`Bearer ${API_KEY}`
 }
 })
 
-const data = await res.json()
+const data=await res.json()
 
-const categories = [...new Set(data.map(i => i.category))]
+const categories=[...new Set(data.map(i=>i.category))]
 
-const select = document.getElementById("categoryFilter")
+const select=document.getElementById("categoryFilter")
 
-if(!select) return
-
-select.innerHTML = `<option value="">All Categories</option>`
+select.innerHTML=`<option value="">All Categories</option>`
 
 categories.forEach(cat=>{
-const opt = document.createElement("option")
-opt.value = cat
-opt.textContent = cat
+
+const opt=document.createElement("option")
+
+opt.value=cat
+opt.textContent=cat
+
 select.appendChild(opt)
+
 })
 
 }
-////////////////////
+
+// ---------- WHATSAPP REPORT ----------
+async function sendLowStockWhatsApp(){
+
+const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=item_name,category,available_stock,minimum_stock,units`,{
+headers:{apikey:API_KEY,Authorization:`Bearer ${API_KEY}`}
+})
+
+const data=await res.json()
+
+const lowByCategory={}
+const availableByCategory={}
+
+data.forEach(i=>{
+
+const cat=i.category || "Other"
+const available=Number(i.available_stock)
+const minimum=Number(i.minimum_stock)
+const units=i.units || ""
+
+if(available<minimum){
+
+if(!lowByCategory[cat]) lowByCategory[cat]=[]
+
+lowByCategory[cat].push(`⚠️ *${i.item_name}* (${available} ${units}/${minimum} ${units})`)
+
+}else{
+
+if(!availableByCategory[cat]) availableByCategory[cat]=[]
+
+availableByCategory[cat].push(`✅ *${i.item_name}* (${available} ${units})`)
+
+}
+
+})
+
+let message=`📦 *INVENTORY REPORT*\n\n`
+
+message+=`🚨 *LOW STOCK ITEMS*\n`
+message+=`━━━━━━━━━━━━━━\n`
+
+if(Object.keys(lowByCategory).length===0){
+
+message+=`✅ No low stock items\n`
+
+}else{
+
+for(const cat in lowByCategory){
+
+message+=`\n📂 *${cat}*\n`
+message+=lowByCategory[cat].join("\n")
+message+="\n"
+
+}
+
+}
+
+message+=`\n━━━━━━━━━━━━━━\n`
+message+=`📦 *AVAILABLE STOCK*\n`
+message+=`━━━━━━━━━━━━━━\n`
+
+for(const cat in availableByCategory){
+
+message+=`\n📂 *${cat}*\n`
+message+=availableByCategory[cat].join("\n")
+message+="\n"
+
+}
+
+message+=`\n⚡ Please restock low items immediately.`
+
+const url=`https://wa.me/?text=${encodeURIComponent(message)}`
+
+window.open(url,"_blank")
+
+}
+
+// ---------- REALTIME ----------
+function enableRealtime(){
+
+if(realtimeChannel) return
+
+realtimeChannel = supabaseClient
+.channel('inventory-live')
+.on(
+'postgres_changes',
+{
+event:'*',
+schema:'public',
+table:'Stock'
+},
+(payload)=>{
+
+console.log("Realtime change:",payload)
+
+loadItems()
+
+}
+)
+.subscribe()
+
+}
+
+// ---------- LOGOUT ----------
 async function logout(){
 
 await supabaseClient.auth.signOut()
@@ -442,40 +482,24 @@ document.getElementById("dashboard").style.display="none"
 document.getElementById("loginScreen").style.display="flex"
 
 }
-///////////////////////
-async function checkSession(){
 
-const { data } = await supabaseClient.auth.getSession()
-
-if(data.session){
-document.getElementById("loginScreen").style.display="none"
-document.getElementById("dashboard").style.display="block"
-loadItems()
-}else{
-document.getElementById("loginScreen").style.display="flex"
-document.getElementById("dashboard").style.display="none"
-}
-
-}
-/////////
+// ---------- HELPER ----------
 function storeOldValue(el){
-  el.dataset.oldValue = el.innerText.trim()
+el.dataset.oldValue=el.innerText.trim()
 }
-// --- Events ---
-document.addEventListener("DOMContentLoaded", () => {
+
+// ---------- EVENTS ----------
+document.addEventListener("DOMContentLoaded",()=>{
 
 checkSession()
 
 document.getElementById("search")
-.addEventListener("input", loadItems)
+.addEventListener("input",loadItems)
 
-const categoryFilter = document.getElementById("categoryFilter")
+const categoryFilter=document.getElementById("categoryFilter")
 
 if(categoryFilter){
-categoryFilter.addEventListener("change", loadItems)
+categoryFilter.addEventListener("change",loadItems)
 }
-
-loadCategories()
-loadItems()
 
 })
