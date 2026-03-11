@@ -137,14 +137,6 @@ text-align:center;
 font-size:14px;
 }
 
-/* ---------- Quantity Column Width ---------- */
-
-table td:nth-child(3),
-table th:nth-child(3){
-width:110px;
-min-width:110px;
-}
-
 /* ---------- Row Hover ---------- */
 tbody tr:hover td{
 background:#f8fafc;
@@ -163,55 +155,34 @@ color:#b91c1c;
 font-weight:700;
 }
 
-/* ---------- Quantity Layout ---------- */
-
-.qty-control{
-display:flex;
-align-items:center;
-justify-content:center;
-gap:6px;
-}
-
+/* ---------- Quantity Buttons ---------- */
 .qty-btn{
 background:#6366f1;
 color:white;
 border:none;
-width:26px;
-height:26px;
+padding:4px 8px;
 border-radius:6px;
 cursor:pointer;
 font-weight:bold;
-display:flex;
-align-items:center;
-justify-content:center;
+margin:0 4px;
 }
 
 .qty-btn:hover{
 background:#4f46e5;
 }
 
-.qty-value{
-min-width:50px;
-max-width:70px;
-text-align:center;
-display:inline-block;
-font-weight:600;
-overflow:hidden;
-white-space:nowrap;
+.qty{
+margin:0 8px;
+font-weight:bold;
 }
 
 /* ---------- Editable Fields ---------- */
-
 td span[contenteditable]{
-padding:4px 6px;
+padding:4px 8px;
 border-radius:6px;
 min-width:40px;
-max-width:60px;
 display:inline-block;
 border:1px solid transparent;
-text-align:center;
-overflow:hidden;
-white-space:nowrap;
 }
 
 td span[contenteditable]:focus{
@@ -325,8 +296,7 @@ cursor:pointer;
 background:#4f46e5;
 }
 
-/* ---------- Mobile Responsive ---------- */
-
+/* ---------- Responsive ---------- */
 @media(max-width:768px){
 
 .header-controls{
@@ -353,9 +323,7 @@ padding:10px;
 }
 
 }
-
 /* ---------- iPad Portrait Fix ---------- */
-
 @media (min-width:600px) and (max-width:900px){
 
 .dashboard-header h1{
@@ -403,35 +371,43 @@ font-size:14px;
 padding:10px;
 }
 
+.qty-btn{
+padding:5px 8px;
 }
 
+}
 /* ---------- Portrait Quantity Layout ---------- */
 
 @media (orientation: portrait){
 
 .qty-control{
+display:flex;
 flex-direction:column;
-gap:4px;
-min-width:45px;
+align-items:center;
+justify-content:center;
+gap:3px;
+min-width:40px;
 }
 
 .qty-btn{
-width:26px;
-height:26px;
+width:24px;
+height:24px;
 font-size:14px;
 padding:0;
+line-height:24px;
+flex-shrink:0;
 }
 
 .qty-value{
-min-width:40px;
-max-width:55px;
+min-width:38px;
+max-width:50px;
 font-size:13px;
+text-align:center;
+overflow:hidden;
+white-space:nowrap;
 }
 
 }
-
-/* ---------- Touch Optimization ---------- */
-
 .qty-btn{
 touch-action: manipulation;
 }
