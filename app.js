@@ -79,7 +79,8 @@ async function loadItems(){
 const search = document.getElementById("search").value || "";
 const category = document.getElementById("categoryFilter").value || "";
 
-let url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*`;
+// FIX: stable ordering
+let url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=id.asc`;
 
 if (search) {
 url += `&or=(item_name.ilike.*${search}*,category.ilike.*${search}*)`;
@@ -300,7 +301,8 @@ async function changeQty(id,newQty){
     })
   })
 
-  loadItems()
+  const span = document.querySelector(`[onclick="changeQty('${id}',${newQty})"]`).parentElement.querySelector("span")
+if(span) span.innerText = newQty
 }
 
 // --- Send WhatsApp Low Stock ---
